@@ -1,0 +1,211 @@
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+}
+
+body {
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: whitesmoke;
+
+}
+
+
+
+a {
+
+    text-decoration: none;
+
+}
+
+li {
+
+    list-style: none;
+
+}
+
+.navbar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content:space-between;
+
+    padding: 10px;
+
+    background-color:black;
+
+    color: #fff;
+
+}
+
+.nav-links a {
+
+    color: #fff;
+
+}
+
+
+
+.logo {
+
+    font-size: 32px;
+
+}
+
+
+
+.menu {
+
+    display: flex;
+
+    gap: 1em;
+
+    font-size: 18px;
+
+}
+
+.menu li:hover {
+
+    border-radius: 5px;
+
+    transition: 0.3s ease;
+
+}
+
+.menu li {
+
+    padding: 5px 14px;
+
+}
+
+.form {
+    padding: 16px;
+    background-color:whitesmoke;
+    margin-top: 125px;
+}
+
+
+input[type=text],
+input[type=password] {
+    width: 40%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border-color:rgba(0, 0, 0, 0.277) ;
+    background: white;
+}
+
+input[type=text]:focus,
+input[type=password]:focus {
+    color:black;
+    outline: none;
+}
+
+.loginbtn {
+    background-color: rgb(198, 2, 2);
+    color: white;
+    padding: 10px 15px;
+    margin: 8px 0;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 10%;
+    opacity: 0.9;
+    margin-bottom: 9.6%;
+    font-size: larger;
+}
+
+.loginbtn:hover{
+    opacity: 1;
+}
+
+a {
+    color: dodgerblue;
+}
+
+
+
+.footer-basic {
+    padding: 40px 0;
+    background-color: black;
+    color: white;
+}
+
+.footer-basic ul {
+    padding: 0;
+    list-style: none;
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.footer-basic li {
+    padding: 0 10px;
+}
+
+.footer-basic ul a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-basic ul a:hover {
+    color:red;
+}
+
+.footer-basic .social {
+    text-align: center;
+    padding-bottom: 25px;
+}
+
+.footer-basic .social>a {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    display: inline-block;
+    text-align: center;
+    border-radius: 50%;
+    border: 1px solid #000000;
+    margin: 0 8px;
+    color: inherit;
+}
+
+.footer-basic .imge{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #000000;
+}
+
+
+
+
+.footer-basic .copyright {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 0;
+}
+
+.footer-basic .copyright>a{
+    color: dodgerblue;
+    text-decoration: none;
+}
+
+
+
+.list-inline-item{
+    font-size: 30px;
+}
+
+.bgimg{
+    width: 100%;
+}

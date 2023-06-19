@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>EShopper</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link href="{% static 'img/favicon.ico' %}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Topbar Start -->
+    <div class="container-fluid">
+        <div class="row align-items-center py-3 px-xl-5">
+            <div class="col-lg-3 d-none d-lg-block">
+                <a href="" class="text-decoration-none">
+                    <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
+                </a>
+            </div>
+            <div class="col-lg-6 col-6 text-left">
+                <form action="{% url 'search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
+                        <datalist id="search-suggestions"></datalist>
+                        <div class="input-group-append">
+                            <button type="submit" class="input-group-text bg-transparent text-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="col-lg-3 col-6 text-right">
+                <a href="{% url 'cartpage' %}"class="btn border">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="badge">{{ cart_item_count }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+
+    <!-- Navbar Start -->
+    <div class="container-fluid">
+        <div class="row border-top px-xl-5">
+            <div class="col-lg-3 d-none d-lg-block">
+                <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    <h6 class="m-0">WELCOME {{user.username}}</h6>
+                </a>
+            </div>
+            <div class="col-lg-9">
+                <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
+                    <a href="" class="text-decoration-none d-block d-lg-none">
+                        <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
+                    </a>
+                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                        <div class="navbar-nav mr-auto py-0">
+                            <a href="{% url 'homepage' %}" class="nav-item nav-link">Home</a>
+                            <a href="{% url 'cartpage' %}" class="nav-item nav-link">Shopping Cart</a>
+                            <a href="{% url 'contactpage' %}" class="nav-item nav-link">Contact</a>
+                            
+                        </div>
+                        <div class="navbar-nav ml-auto py-0">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'logoutpage' %}" class="nav-item nav-link">Logout</a>
+                            {% else %}
+                            <a href="{% url 'loginpage' %}" class="nav-item nav-link">Login</a>
+                            <a href="{% url 'registerpage' %}" class="nav-item nav-link">Register</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+
+    <!-- Page Header Start -->
+    <div class="container-fluid bg-secondary mb-5">
+        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px">
+            <h1 class="font-weight-semi-bold text-uppercase mb-3">Shop Detail</h1>
+            <div class="d-inline-flex">
+                <p class="m-0"><a href="{% url 'homepage' %} ">Home</a></p>
+                <p class="m-0 px-2">-</p>
+                <p class="m-0">Shop Detail</p>
+            </div>
+        </div>
+    </div>
+    <!-- Page Header End -->
+
+
+    <!-- Shop Detail Start -->
+    <div class="container-fluid py-5">
+        <div class="row px-xl-5">
+            <div class="col-lg-5 pb-5">
+                <div id="product-carousel" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner border">
+                        <div class="carousel-item active">
+                            <img class="w-100 h-100" src="{{ product.image.url }}" alt="Image">
+                        </div>
+                        <div class="carousel-item">
+                            <img class="w-100 h-100" src="{{ product.image.url }}" alt="Image">
+                        </div>
+                        <div class="carousel-item">
+                            <img class="w-100 h-100" src="{{ product.image.url }}" alt="Image">
+                        </div>
+                        <div class="carousel-item">
+                            <img class="w-100 h-100" src="{{ product.image.url }}" alt="Image">
+                        </div>
+                    </div>
+                    <a class="carousel-control-prev" href="#product-carousel" data-slide="prev">
+                        <i class="fa fa-2x fa-angle-left text-dark"></i>
+                    </a>
+                    <a class="carousel-control-next" href="#product-carousel" data-slide="next">
+                        <i class="fa fa-2x fa-angle-right text-dark"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-7 pb-5">
+                
+                <div class="d-flex mb-3">
+                    <h3 class="font-weight-semi-bold">{{ product.name }}</h3>
+                    <small class="pt-1">({{ comments.count }} Reviews)</small>
+                </div>
+                <h3 class="font-weight-semi-bold mb-4">Rs.{{ product.price|floatformat }}</h3>
+                <p class="mb-4">Introducing our best-selling product - {{ product.name }}. Made from high-quality cotton, this dress is both comfortable and stylish.. Perfect for dressing up or down, this dress is a versatile addition to any wardrobe. Available in a range of sizes, find your perfect fit today and discover why it's our best-selling product.</p>
+                <div class="d-flex mb-3">
+                </div>
+                <div class="d-flex mb-4">
+                </div>
+                <!-- shopdetail.html -->
+<form action="{% url 'add_to_cart' product.id %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 pt-2">
+        <input type="submit" class="btn btn-primary px-3" value="Add to Cart">
+    </div>
+</form>
+
+                <div class="d-flex pt-2">
+                    <p class="text-dark font-weight-medium mb-0 mr-2">Share on:</p>
+                    <div class="d-inline-flex">
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row px-xl-5">
+            <div class="col">
+                <div class="nav nav-tabs justify-content-center border-secondary mb-4">
+                    <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">Description</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-2">Information</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3">Reviews ({{ comments.count }})</a>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tab-pane-1">
+                        <h4 class="mb-3">Product Description</h4>
+                        <p>At our store, we pride ourselves on offering high-quality clothing that is both stylish and durable. Our garments are made from premium materials and are designed to last, so you can enjoy wearing them for years to come. Whether you’re dressing up for a special occasion or just need something comfortable for everyday wear, you can trust that our clothing will meet your needs</p>
+                    </div>
+                    <div class="tab-pane fade" id="tab-pane-2">
+                        <h4 class="mb-3">Additional Information</h4>
+                        <p>“Welcome to our clothing section, where you’ll find a wide variety of apparel for men, women, and children. From formal wear to casual wear, we have something for every occasion. Browse our collection and discover the latest trends and styles. With our diverse selection, you’re sure to find something you love.”</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-6">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tab-pane-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="mb-4">{{ comments.count }} review for "{{ product.name }}"</h4>
+                                {% for comment in comments %}
+                                
+                                <div class="media mb-4">
+                                    <img src="{% static 'img/user.jpg' %}" alt="Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
+                                    <div class="media-body">
+                                        <h6>{{ comment.name }}<small> - <i>{{ comment.created_on }}</i></small></h6>
+                                        <p>{{ comment.body }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p>No comments yet.</p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="mb-4">Leave a review</h4>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="message">Your review *</label>
+                                        <textarea id="message" cols="30" rows="5" class="form-control" name="body"></textarea>
+                                    </div>
+                                    <input class="btn btn-primary btn-block border-0 py-3" type="submit" value="Submit">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Shop Detail End -->
+
+
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-secondary text-dark mt-5 pt-5">
+        <div class="row px-xl-5 pt-5">
+            <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
+                <a href="" class="text-decoration-none">
+                    <h1 class="mb-4 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border border-white px-3 mr-1">E</span>Shopper</h1>
+                </a>
+                <p>Eshopper is an online clothing store that offers a wide range of fashionable and trendy clothes for men, women, and children. Our website is easy to navigate, making it simple for customers to find the perfect outfit for any occasion..</p>
+                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
+                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
+                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+            </div>
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-md-4 mb-5">
+                    </div>
+                    <div class="col-md-4 mb-5">
+                    </div>
+                    <div class="col-md-4 mb-5">
+                        <h5 class="font-weight-bold text-dark mb-4">Quick Links</h5>
+                        <div class="d-flex flex-column justify-content-start">
+                            <a class="text-dark mb-2" href="{% url 'homepage' %}"><i class="fa fa-angle-right mr-2"></i>Home</a>
+                            <a class="text-dark mb-2" href="{% url 'cartpage' %}"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
+                            <a class="text-dark mb-2" href="{% url 'checkoutpage' %}"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
+                            <a class="text-dark" href="{% url 'contactpage' %}"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row border-top border-light mx-xl-5 py-4">
+            <div class="col-md-6 px-xl-0">
+                <p class="mb-md-0 text-center text-md-left text-dark">
+                    &copy; <a class="text-dark font-weight-semi-bold" href="#">EShopper</a>. All Rights Reserved.
+                    <a class="text-dark font-weight-semi-bold" href="https://htmlcodex.com">HTML Codex</a>
+                </p>
+            </div>
+            <div class="col-md-6 px-xl-0 text-center text-md-right">
+                <img class="img-fluid" src="{% static 'img/payments.png' %}" alt="">
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+    <!-- Contact Javascript File -->
+    <script src="{% static 'mail/jqBootstrapValidation.min.js' %}"></script>
+    <script src="{% static 'mail/contact.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>
