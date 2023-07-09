@@ -24,6 +24,8 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
 
 <body>
@@ -38,13 +40,12 @@
             <div class="col-lg-6 col-6 text-left">
                 <form action="{% url 'search' %}" method="get">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
-                        <datalist id="search-suggestions"></datalist>
-                        <div class="input-group-append">
-                            <button type="submit" class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
+                    <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
+                    <div class="input-group-append">
+                        <button type="submit" class="input-group-text bg-transparent text-primary">
+                        <i class="fa fa-search"></i>
+                        </button>
+                    </div>
                     </div>
                 </form>
             </div>
@@ -52,7 +53,7 @@
             <div class="col-lg-3 col-6 text-right">
                 <a href="{% url 'cartpage' %}"class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">{{ cart_item_count }}</span>
+                    <span class="badge" >{{order.get_cart_items}}</span>
                 </a>
             </div>
         </div>
@@ -65,7 +66,11 @@
         <div class="row border-top px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    {% if user.is_authenticated %}
                     <h6 class="m-0">WELCOME {{user.username}}</h6>
+                    {% else %}
+                    <h6 class="m-0">WELCOME GUEST</h6>
+                    {% endif %}
                 </a>
             </div>
             <div class="col-lg-9">
@@ -81,8 +86,7 @@
                             <a href="{% url 'homepage' %}" class="nav-item nav-link">Home</a>
                             <a href="{% url 'cartpage' %}" class="nav-item nav-link">Shopping Cart</a>
                             <a href="{% url 'checkoutpage' %}" class="nav-item nav-link active">Checkout</a>
-                            <a href="{% url 'contactpage' %}" class="nav-item nav-link">Contact</a>
-                            
+                            <a href="{% url 'contactpage' %}" class="nav-item nav-link">Contact</a>   
                         </div>
                         <div class="navbar-nav ml-auto py-0">
                             {% if user.is_authenticated %}
@@ -123,22 +127,6 @@
                         {% csrf_token %}
                     <h4 class="font-weight-semi-bold mb-4">Billing Address</h4>
                     <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>First Name</label>
-                            <input class="form-control" type="text" placeholder="John">
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Last Name</label>
-                            <input class="form-control" type="text" placeholder="Doe">
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>E-mail</label>
-                            <input class="form-control" type="text" placeholder="example@email.com">
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Mobile No</label>
-                            <input class="form-control" type="text" placeholder="+123 456 789">
-                        </div>
                         <div class="col-md-6 form-group">
                             <label>Address</label>
                             <input class="form-control" type="text" name="address" placeholder="123 Street" required>
@@ -301,19 +289,30 @@
 
     <!-- Template Javascript -->
     <script src="{% static 'js/main.js' %}"></script>
+    <!-- Load jQuery UI from a CDN -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
     <script>
+        jQuery(document).ready(function() {
+            var inputElement = jQuery("#search-input");
+            inputElement.autocomplete({
+                source: "{% url 'autosearch' %}"
+            }); 
+        });
+
         $('#place-order-button').on('click', function() {
-            // Trigger form validation
             if ($('#checkout-form')[0].checkValidity()) {
-                // If the form is valid, submit it
                 $('#checkout-form').submit();
             } else {
-                // If the form is not valid, display an error message
-                alert('Please fill "Address","City","State","ZIP code" fields');
-                location.reload(); // Reload the current page
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": 2000
+                }
+                toastr.error('Please fill "Address","City","State","ZIP code"');
             }
         });
-        
     </script>
 </body>
 

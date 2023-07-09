@@ -9,6 +9,9 @@
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
 
+    <!-- Load jQuery UI CSS from a CDN -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
     <!-- Favicon -->
     <link href="{% static 'img/favicon.ico' %}" rel="icon">
 
@@ -24,8 +27,8 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
-</head>
 
+</head>
 <body>
     <!-- Topbar Start -->
     <div class="container-fluid">
@@ -38,13 +41,12 @@
             <div class="col-lg-6 col-6 text-left">
                 <form action="{% url 'search' %}" method="get">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
-                        <datalist id="search-suggestions"></datalist>
-                        <div class="input-group-append">
-                            <button type="submit" class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
+                    <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
+                    <div class="input-group-append">
+                        <button type="submit" class="input-group-text bg-transparent text-primary">
+                        <i class="fa fa-search"></i>
+                        </button>
+                    </div>
                     </div>
                 </form>
             </div>
@@ -52,7 +54,7 @@
             <div class="col-lg-3 col-6 text-right">
                 <a href="{% url 'cartpage' %}"class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">{{ cart_item_count }}</span>
+                    <span class="badge" id="cart-number">{{ order.get_cart_items }}</span>
                 </a>
             </div>
         </div>
@@ -65,7 +67,11 @@
         <div class="row border-top px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    {% if user.is_authenticated %}
                     <h6 class="m-0">WELCOME {{user.username}}</h6>
+                    {% else %}
+                    <h6 class="m-0">WELCOME GUEST</h6>
+                    {% endif %}
                 </a>
             </div>
             <div class="col-lg-9">
@@ -123,9 +129,9 @@
             
             <div class="col-lg-7 mb-5">
                 
-                <div class="contact-form">
+                <div id="form-container" class="contact-form">
                     
-                    <form action="{% url 'contactpage' %}" method="post" >
+                    <form action="{% url 'contactpage' %}" method="post" id="contact-form" >
                         {% csrf_token %}
                         <div class="control-group">
                             <input type="text" class="form-control"  id="name" name="name"  placeholder="Your Name"
@@ -155,7 +161,6 @@
                     </form>
                     
                 </div>
-               
             </div>
             
             <div class="col-lg-5 mb-5">
@@ -238,6 +243,29 @@
 
     <!-- Template Javascript -->
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- Load jQuery UI from a CDN -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+<script>
+        window.addEventListener('pageshow', () => {
+            updateCartNumber();
+        });
+        function updateCartNumber() {
+            fetch('/get_cart_number/')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                });
+        }
+
+        jQuery(document).ready(function() {
+            var inputElement = jQuery("#search-input");
+            inputElement.autocomplete({
+                source: "{% url 'autosearch' %}"
+            }); 
+        });
+
+</script>  
 </body>
 
 </html>

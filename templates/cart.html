@@ -9,6 +9,9 @@
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
 
+    <!-- Load jQuery UI CSS from a CDN -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
     <!-- Favicon -->
     <link href="{% static 'img/favicon.ico' %}" rel="icon">
 
@@ -24,8 +27,14 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+        <!-- include the Toastr CSS and JavaScript files -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
-
+<style>
+    .hidden {
+        display: none;
+    }
+</style>    
 <body>
     <!-- Topbar Start -->
     <div class="container-fluid">
@@ -38,13 +47,12 @@
             <div class="col-lg-6 col-6 text-left">
                 <form action="{% url 'search' %}" method="get">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
-                        <datalist id="search-suggestions"></datalist>
-                        <div class="input-group-append">
-                            <button type="submit" class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
+                    <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
+                    <div class="input-group-append">
+                        <button type="submit" class="input-group-text bg-transparent text-primary">
+                        <i class="fa fa-search"></i>
+                        </button>
+                    </div>
                     </div>
                 </form>
             </div>
@@ -52,7 +60,7 @@
             <div class="col-lg-3 col-6 text-right">
                 <a href="{% url 'cartpage' %}"class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">{{ cart_item_count }}</span>
+                    <span class="badge" id="cart-number">{{ order.get_cart_items }}</span>
                 </a>
             </div>
         </div>
@@ -65,7 +73,11 @@
         <div class="row border-top px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    {% if user.is_authenticated %}
                     <h6 class="m-0">WELCOME {{user.username}}</h6>
+                    {% else %}
+                    <h6 class="m-0">WELCOME GUEST</h6>
+                    {% endif %}
                 </a>
             </div>
             <div class="col-lg-9">
@@ -96,27 +108,19 @@
         </div>
     </div>
     <!-- Navbar End -->
-  
+
 
 
     <!-- Cart Start -->
-   
+
     <div class="container-fluid pt-5">
-        <center>
-            {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-            </center>
         <div class="row px-xl-5">
             
             <div class="col-lg-8 table-responsive mb-5">
-                
-                <table class="table table-bordered text-center mb-0">
-                    {% for i  in items  %}
-                    <thead class="bg-secondary text-dark">
-                        <tr>
+                <table class="table table-bordered text-center mb-0" id="cart-content">
+                    
+                    <thead class="bg-secondary text-dark {% if not items %}hidden{% endif %}">
+                        <tr >
                             <th>Products</th>
                             <th>Price</th>
                             <th>Quantity</th>
@@ -126,38 +130,39 @@
                     </thead>
                     
                     <tbody class="align-middle">
-                        
-                        <tr>
-                            
-                            <td class="align-middle"><img src="{{i.product.image.url}}" alt="" style="width: 50px;"> {{i.product.name}}</td>
+                        {% for i  in items  %}
+                        <tr id="item-row-{{ i.product.id }}">    
+                            <td class="align-left"><img src="{{i.product.image.url}}" alt="" style="width: 50px;"> {{i.product.name}}</td>
                             <td class="align-middle">Rs.{{i.product.price|floatformat:2}}</td>
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
-
-                                        <a href="{% url 'decrease_quantity' i.product.id %}"  class="btn btn-sm btn-primary btn-minus" >
-                                        <i class="fa fa-minus"></i>
-                                        </a>
+                                        <button onclick="decreaseQuantity({{ i.product.id }})" class="btn btn-sm btn-primary btn-minus">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
                                     </div>
                                     <input type="text" class="form-control form-control-sm bg-secondary text-center" value="{{i.quantity}}">
                                     <div class="input-group-btn">
-                                        <a href="{% url 'increase_quantity' i.product.id %}" class="btn btn-sm btn-primary btn-plus">
+                                        <button onclick="increaseQuantity({{ i.product.id }})" class="btn btn-sm btn-primary btn-plus">
                                             <i class="fa fa-plus"></i>
-                                        </a>
+                                        </button>   
                                     </div>
                                 </div>
                             </td>
-                            <td class="align-middle">Rs.{{i.get_total}}</td>
+                            <td id="cart-subtotal1" class="align-middle">Rs.{{i.get_total}}</td>
                             <td class="align-middle">
-                                <a href="{% url 'remove_item' i.product.id %}" class="btn btn-sm btn-primary">
+                                <button onclick="removeItem({{ i.product.id }})" class="btn btn-sm btn-primary">
                                     <i class="fa fa-times"></i>
-                                </a>
+                                </button>
+                                
                             </td>
                         </tr>
+                        {% empty %}
+                        <center>
+                        <p>Cart is Empty.</p>
+                        </center>
+                        {% endfor %}
                     </tbody>
-                    {% empty %}
-                                <p>Cart is Empty.</p>
-                    {% endfor %}
                 </table>
                 
             </div>
@@ -169,11 +174,11 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3 pt-1">
                             <h6 class="font-weight-medium">Subtotal</h6>
-                            <h6 class="font-weight-medium">{{order.get_cart_total}}</h6>
+                            <h6 id="cart-subtotal" class="font-weight-medium">{{order.get_cart_total}}</h6>
                         </div>
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">Total Items</h6>
-                            <h6 class="font-weight-medium">{{order.get_cart_items}}</h6>
+                            <h6 id="cart-total-items" class="font-weight-medium">{{order.get_cart_items}}</h6>
                         </div>
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">Shipping</h6>
@@ -183,7 +188,7 @@
                     <div class="card-footer border-secondary bg-transparent">
                         <div class="d-flex justify-content-between mt-2">
                             <h5 class="font-weight-bold">Total</h5>
-                            <h5 class="font-weight-bold">{{order.get_cart_total}}</h5>
+                            <h5 id="cart-total" class="font-weight-bold">{{order.get_cart_total}}</h5>
                         </div>
                         <a href="{% url 'checkoutpage' %}" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</a>
                     </div>
@@ -257,6 +262,72 @@
 
     <!-- Template Javascript -->
     <script src="{% static 'js/main.js' %}"></script>
+    <!-- Load jQuery UI from a CDN -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    
+    <script>
+        jQuery(document).ready(function() {
+            var inputElement = jQuery("#search-input");
+            inputElement.autocomplete({
+                source: "{% url 'autosearch' %}"
+            }); 
+        });
+
+        function increaseQuantity(productId) {
+            fetch(`/increase/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                    document.querySelector('#cart-subtotal').textContent = data.cart_subtotal;
+                    document.querySelector('#cart-total-items').textContent = data.cart_total_items;
+                    document.querySelector('#cart-total').textContent = data.cart_total;
+                });
+        }
+        
+        function decreaseQuantity(productId) {
+            fetch(`/decrease-quantity/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                    document.querySelector('#cart-subtotal').textContent = data.cart_subtotal;
+                    document.querySelector('#cart-total-items').textContent = data.cart_total_items;
+                    document.querySelector('#cart-total').textContent = data.cart_total;
+                    if (data.quantity === 0) {
+                        document.querySelector(`#item-row-${productId}`).remove();
+                    }
+                    if (data.cart_total_items === 0) {
+                        document.querySelector('#cart-content > thead').style.display = 'none';
+                        let message = document.createElement('p');
+                        message.textContent = 'Cart is Empty.';
+                        document.querySelector('#cart-content').appendChild(message);
+                    }
+                });
+        }
+        
+        function removeItem(productId) {
+            fetch(`/remove_item/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                    document.querySelector('#cart-subtotal').textContent = data.cart_subtotal;
+                    document.querySelector('#cart-total-items').textContent = data.cart_total_items;
+                    document.querySelector('#cart-total').textContent = data.cart_total;
+                    document.querySelector(`#item-row-${productId}`).remove();
+                    if (data.cart_total_items === 0) {
+                        document.querySelector('#cart-content > thead').style.display = 'none';
+                        let message = document.createElement('p');
+                        message.textContent = 'Cart is Empty.';
+                        document.querySelector('#cart-content').appendChild(message);
+                    }
+                });
+        }
+        
+        
+        
+        
+
+    </script>
+
 </body>
 
 </html>

@@ -9,6 +9,9 @@
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="Free HTML Templates" name="keywords">
         <meta content="Free HTML Templates" name="description">
+
+        <!-- Load jQuery UI CSS from a CDN -->
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     
         <!-- Favicon -->
         <link href="{% static 'img/favicon.ico' %}" rel="icon">
@@ -56,7 +59,7 @@
             <div class="col-lg-3 col-6 text-right">
                 <a href="{% url 'cartpage' %}"class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">{{ cart_item_count }}</span>
+                    <span class="badge" id="cart-number">{{ order.get_cart_items }}</span>
                 </a>
             </div>
         </div>
@@ -68,7 +71,11 @@
         <div class="row border-top px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    {% if user.is_authenticated %}
                     <h6 class="m-0">WELCOME {{user.username}}</h6>
+                    {% else %}
+                    <h6 class="m-0">WELCOME GUEST</h6>
+                    {% endif %}
                 </a>
             </div>
             <div class="col-lg-9">
@@ -76,9 +83,6 @@
                     <a href="" class="text-decoration-none d-block d-lg-none">
                         <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
                     </a>
-                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
                     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                         <div class="navbar-nav mr-auto py-0">
                             <a href="{% url 'homepage' %}" class="nav-item nav-link">Home</a>
@@ -113,7 +117,6 @@
                 <p class="m-0"><a href="{% url 'registerpage' %}">Register new account</a></p>
             </div>
         </div>
-  
     </div>
     <!-- Page Header End -->
 
@@ -137,13 +140,6 @@
             </div>
         </center>
     </form>
-    
-
-
-
-
-
-
     
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-dark mt-5 pt-5">
@@ -189,9 +185,30 @@
     </div>
     <!-- Footer End -->
     </div>
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- Load jQuery UI from a CDN -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+<script>
+        jQuery(document).ready(function() {
+            var inputElement = jQuery("#search-input");
+            inputElement.autocomplete({
+                source: "{% url 'autosearch' %}"
+            }); 
+        });
 
 
+        window.addEventListener('pageshow', () => {
+            updateCartNumber();
+        });
+        function updateCartNumber() {
+            fetch('/get_cart_number/')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                });
+        }
 
+</script>
 </body>
-
 </html>

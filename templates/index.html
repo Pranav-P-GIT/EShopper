@@ -9,6 +9,9 @@
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
 
+    <!-- Load jQuery UI CSS from a CDN -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
     <!-- Favicon -->
     <link href="{% static 'img/favicon.ico' %}" rel="icon">
 
@@ -23,12 +26,18 @@
     <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="{% static 'css/style.css' %}"" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
 
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!-- include the Toastr CSS and JavaScript files -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 </head>
-
+<style>
+    #toast-container > .toast {
+        background-color: #c17a74 !important;
+    }
+</style>
 
 
 <body>
@@ -43,13 +52,12 @@
             <div class="col-lg-6 col-6 text-left">
                 <form action="{% url 'search' %}" method="get">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
-                        <datalist id="search-suggestions"></datalist>
-                        <div class="input-group-append">
-                            <button type="submit" class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
+                    <input type="text" class="form-control" placeholder="Search for products" name="q" id="search-input" list="search-suggestions">
+                    <div class="input-group-append">
+                        <button type="submit" class="input-group-text bg-transparent text-primary">
+                        <i class="fa fa-search"></i>
+                        </button>
+                    </div>
                     </div>
                 </form>
             </div>
@@ -57,7 +65,7 @@
             <div class="col-lg-3 col-6 text-right">
                 <a href="{% url 'cartpage' %}"class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">{{ cart_item_count }}</span>
+                    <span class="badge" id="cart-number"></span>
                 </a>
             </div>
         </div>
@@ -70,7 +78,11 @@
         <div class="row border-top px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse"  style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                    {% if user.is_authenticated %}
                     <h6 class="m-0">WELCOME {{user.username}}</h6>
+                    {% else %}
+                    <h6 class="m-0">WELCOME GUEST</h6>
+                    {% endif %}
                 </a>
 
             </div>
@@ -139,9 +151,9 @@
     <center>
         {% if messages %}
         {% for message in messages %}
-        <h3 class="m-0">>{{message}}<</h3>
+        <h3 class="m-0">>>{{message}}</h3>
         {% endfor %}
-    {% endif %}
+        {% endif %}
         </center>
     <!-- Featured Start -->
     <div class="container-fluid pt-5">
@@ -175,10 +187,6 @@
     <!-- Featured End -->
 
 
-    
-
-
-
     <!-- Products Start -->
     <div class="container-fluid pt-5">
         <div class="text-center mb-4">
@@ -198,7 +206,8 @@
                     </div>
                     <div class="card-footer d-flex justify-content-between bg-light border">
                         <a href="{% url 'detailpage' %}?id={{i.id}}" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
-                        <a href="{% url 'add_to_cart' i.id %}" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</a>
+                        <button class="btn btn-sm text-dark p-0"  onclick="addToCart({{i.id}})"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</button>
+
                     </div>
                 </div>
                 
@@ -311,6 +320,52 @@
 
     <!-- Template Javascript -->
     <script src="{% static 'js/main.js' %}"></script>
+    <!-- Load jQuery UI from a CDN -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+        jQuery(document).ready(function() {
+            var inputElement = jQuery("#search-input");
+            inputElement.autocomplete({
+                source: "{% url 'autosearch' %}"
+            }); 
+        });
+
+
+        window.addEventListener('pageshow', () => {
+            updateCartNumber();
+        });
+
+        function updateCartNumber() {
+            fetch('/get_cart_number/')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#cart-number').textContent = data.cart_number;
+                });
+        }
+
+        function addToCart(productId) {
+            console.log('addToCart function called with productId:', productId);
+            fetch(`/add-to-cart/${productId}/`)
+            .then(response => {
+                if (response.redirected) {
+                    window.location.assign(response.url);
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                updateCartNumber();
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": 1000
+                }
+                toastr.success('Product added to cart');
+            });
+        }
+</script>
+            
 
 
 </body>

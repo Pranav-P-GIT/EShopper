@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, render,get_object_or_404
 from django.urls import reverse
 from django.contrib import auth
 from .models import *
 from django.contrib import messages
-
-
+from django.views.decorators.cache import never_cache
+from django.http import HttpResponse
 
 
 def index (request):
@@ -14,15 +15,14 @@ def index (request):
     return render(request,"index.html",context)
 
 
-
 def details(request):
     id = request.GET["id"]
     product = get_object_or_404(Product, id=id)
     comments = product.comments.filter(active=True)
     if request.method == 'POST':
         if request.user.is_authenticated:
-            name = request.user.customer.name
-            email = request.user.customer.email
+            name = request.user.username
+            email = request.user.email
             body = request.POST.get('body')
             comment = Comment.objects.create(product=product, name=name, email=email, body=body,active=True)
             return redirect(f'{reverse("detailpage")}?id={id}') 
@@ -41,13 +41,13 @@ def register(request):
         ucheck=User.objects.filter(username=username)
         echeck=User.objects.filter(email=email)
         if ucheck:
-            msg="USERNAME ALREADY EXISTS"
+            msg="Username already exists."
             return render(request,"registerpage.html",{"msg":msg})
         elif echeck:
-            msg="EMAIL ALREADY EXITS"
+            msg="Email already exists."
             return render(request,"registerpage.html",{"msg":msg})
         elif password=="" or password!=repassword:
-            msg="RE-PASSWORD ERROR"
+            msg="Re-password error."
             return render(request,"registerpage.html",{"msg":msg})
         else:
             user=User.objects.create_user(username=username,email=email,password=password)
@@ -65,7 +65,7 @@ def login_view(request):
             auth.login(request,check)
             return redirect("/")
         else:
-            msg="INVALID USERNAME OR PASSWORD"
+            msg="Invalid username or password."
             return render(request,"loginpage.html",{"msg":msg})
     else:
         return render(request,"loginpage.html")
@@ -89,7 +89,14 @@ def cart(request):
 
 
 
-
+def get_cart_number(request):
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cart_number = order.get_cart_items
+    else:
+        cart_number = 0
+    return JsonResponse({'cart_number': cart_number})
 
 
 def add_to_cart(request, product_id):
@@ -100,9 +107,7 @@ def add_to_cart(request, product_id):
         order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
         order_item.quantity += 1
         order_item.save()
-        messages.success(request, 'Product added to cart') 
-        next_url = request.META.get('HTTP_REFERER', '/')
-        return redirect(next_url)
+        return JsonResponse({})
     else:
         return redirect('loginpage')
 
@@ -116,11 +121,23 @@ def decrease_quantity(request, product_id):
     if order_item.quantity > 1:
         order_item.quantity -= 1
         order_item.save()
-        messages.success(request, 'Removed one quantity successfully')
     else:
-        order_item.delete() 
-        messages.success(request, 'Successfully removed item')
-    return redirect('cartpage')
+        order_item.delete()
+    cart_number = order.get_cart_items
+    cart_subtotal = order.get_cart_total
+    cart_total_items = order.get_cart_items
+    cart_total = order.get_cart_total
+    try:
+        quantity = OrderItem.objects.get(order=order, product=product).quantity
+    except OrderItem.DoesNotExist:
+        quantity = 0
+    return JsonResponse({
+        'cart_number': cart_number,
+        'cart_subtotal': cart_subtotal,
+        'cart_total_items': cart_total_items,
+        'cart_total': cart_total,
+        'quantity': quantity,
+    })
 
 
 
@@ -131,8 +148,18 @@ def increase_quantity(request, product_id):
     order_item = OrderItem.objects.get(order=order, product=product)
     order_item.quantity += 1
     order_item.save()
-    messages.success(request, 'Added quantity successfully')
-    return redirect('cartpage')
+    cart_number = order.get_cart_items
+    cart_subtotal = order.get_cart_total
+    cart_total_items = order.get_cart_items
+    cart_total = order.get_cart_total
+    singleitem_total=order_item.get_total
+    return JsonResponse({
+        'cart_number': cart_number,
+        'cart_subtotal': cart_subtotal,
+        'cart_total_items': cart_total_items,
+        'cart_total': cart_total,
+        "singleitem_total": singleitem_total,
+    })
 
 
 def remove_item(request, product_id):
@@ -141,11 +168,20 @@ def remove_item(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     order_item = OrderItem.objects.get(order=order, product=product)
     order_item.delete()
-    messages.success(request, 'Successfully removed item')
-    return redirect('cartpage')
+    cart_number = order.get_cart_items
+    cart_subtotal = order.get_cart_total
+    cart_total_items = order.get_cart_items
+    cart_total = order.get_cart_total
+    return JsonResponse({
+        'cart_number': cart_number,
+        'cart_subtotal': cart_subtotal,
+        'cart_total_items': cart_total_items,
+        'cart_total': cart_total,
+    })
 
 
 
+@never_cache
 @login_required(login_url="loginpage")
 def checkout(request):
     if request.method == 'POST' :
@@ -187,26 +223,11 @@ def checkout(request):
     context={'items':items,'order':order}
     return render(request,"checkout.html",context)
 
-
-
-
-
-def search(request):
-    query = request.GET.get('q')
-    results = []
-    if query:
-        products = Product.objects.filter(name__icontains=query)
-        results = list(products)
-    return render(request, 'search_results.html', {'results': results})
-
-
-
-
 def contact(request):
     if request.method=="POST":
         if request.user.is_authenticated:
-            name = request.user.customer.name
-            email = request.user.customer.email
+            name = request.user.username
+            email = request.user.email
             subject =request.POST["subject"] 
             message = request.POST["message"] 
             contacts=Contact(name=name,email=email,subject=subject,message=message)
@@ -223,3 +244,23 @@ def contact(request):
             messages.success(request,"we will contact you soon")
             return redirect("homepage")
     return render(request,"contact.html")
+
+
+
+def search(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        products = Product.objects.filter(name__icontains=query)
+        results = list(products)
+    return render(request, 'search_results.html', {'results': results})
+
+def autosearch(request):
+    query = request.GET['term']
+    product_names = []
+    if query:
+        products = Product.objects.filter(name__istartswith=query)
+        for product in products:
+            product_names.append(product.name)
+        return JsonResponse(product_names, safe=False)
+    return JsonResponse([], safe=False)

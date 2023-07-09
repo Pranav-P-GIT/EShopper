@@ -103,10 +103,3 @@
 })(jQuery);
 
 
-
-console.log('JavaScript code is being executed');
-
-document.getElementById('place-order-button').addEventListener('click', function() {
-    document.getElementById('checkout-form').submit();
-    console.log('Place Order button was clicked');
-});
